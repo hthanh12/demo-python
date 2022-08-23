@@ -151,14 +151,6 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         field_update = ['completed_at', 'sub_total', 'total', 'discount', 'discount_value', 'status']
         data_update(instance, validated_data, field_update)
-        discount = None
-
-        discount_id = validated_data.get('discount').id if validated_data.get('discount') else None
-
-        if(discount_id is not None):
-            discount = Discount.objects.get(pk=discount_id)
-
-        validated_data = { **validated_data, "discount_value": discount.value if discount else None}
-
+        
         instance.save()
         return instance
