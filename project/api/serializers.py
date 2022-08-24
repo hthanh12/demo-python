@@ -80,12 +80,11 @@ class DiscountSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
 # OrderToProduct
 class OrderToProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderToProduct
-        fields = [ 'id','created_at', 'updated_at', 'deleted_at', 'note', 'price', 'quantity', 'amount', 'product', 'order','product']
+        fields = [ 'id','created_at', 'updated_at', 'deleted_at', 'note', 'price', 'quantity', 'amount',  'order','product']
         
     def __str__(self):
         return self.name
@@ -94,7 +93,7 @@ class OrderToProductSerializer(serializers.ModelSerializer):
         """
         Create and return a new `OrderToProduct` instance, given the validated data.
         """
-        order_sub_total = cal_sum_order_current( validated_data['order'].id) 
+        order_sub_total = cal_sum_order_current(validated_data['order'].id) 
         order = validated_data['order']
         amount = validated_data['product'].price_current * validated_data['quantity']
         order_sub_total += amount
@@ -118,13 +117,37 @@ class OrderToProductSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    def delete(self, instance):
+        print('deletedeletedeletedelete')
+        return instance
+
+    def perform_destroy(self, instance):
+        print('destroydestroydestroydestroydestroydestroydestroy')
+        return instance
+        
+class OrderToProductListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        return {
+            'id': value.id,
+            'product': value.product.id,
+            'amount': value.amount,
+            'quantity': value.quantity
+        }
 # Order
 class OrderSerializer(serializers.ModelSerializer):
-    products = OrderToProductSerializer(many=True, read_only=True)
+    # products = serializers.SlugRelatedField(
+    #     many=True,
+    #     read_only=True,
+    #     slug_field=['amount','id']
+    #  )
+    # products = OrderToProductSerializer(many=True, read_only=True)
+    products = OrderToProductListingField(many=True, read_only=True)
+
+
     class Meta:
         model = Order
         fields = [  'id', 'member','discount', 'created_at', 'updated_at', 'deleted_at', 'completed_at', 'sub_total', 'total', 'discount_value', 'products']
-        
+
     def __str__(self):
         return self.total
         
@@ -135,12 +158,14 @@ class OrderSerializer(serializers.ModelSerializer):
         # print('validated_data',validated_data)
         # print('validated_data',validated_data['discount'].id)
         discount_id = validated_data.get('discount').id if validated_data.get('discount') else None
-        discount = None
+        discount = {}
 
         if(discount_id is not None):
             discount = Discount.objects.get(pk=discount_id)
 
-        validated_data = { **validated_data, "discount_value": discount.value if discount else None}
+        validated_data = { **validated_data, "discount_value": discount.get('value', None)}
+        print('0000000000000000000000000000000000000000000000000000000000000000000000000000')
+        print(validated_data)
         return Order.objects.create(**validated_data)
 
     def update(self, instance, validated_data):

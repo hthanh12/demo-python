@@ -1,4 +1,5 @@
 # Create your views here.
+from django.http import Http404
 from distutils.log import error
 from api.models import Member, Product, Order, OrderToProduct, Discount
 from api.serializers import MemberSerializer, ProductSerializer, OrderSerializer, OrderToProductSerializer, DiscountSerializer
@@ -6,8 +7,13 @@ from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import status
 
+# Check health
+class Pong(APIView):
+    def get(self, request):
+        return Response('pong')
 # Route Member
 class MemberList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
@@ -29,7 +35,6 @@ class MemberDetail(mixins.RetrieveModelMixin,
     serializer_class = MemberSerializer
 
     def get(self, request, *args, **kwargs):
-        print(request)
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
@@ -131,25 +136,35 @@ class OrderToProductList(mixins.ListModelMixin,
         return self.list(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
-        print('self',self)
         return self.create(request, *args, **kwargs)
 
-class OrderToProductDetail(mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    generics.GenericAPIView):
+class OrderToProductDetail(APIView):
     queryset = OrderToProduct.objects.all()
     serializer_class = OrderToProductSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def get_object(self, pk):
+        try:
+            return OrderToProduct.objects.get(pk=pk)
+        except OrderToProduct.DoesNotExist as e:
+            raise Http404 from e
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+    def get(self, request, pk, format=None):
+        order_to_project = self.get_object(pk)
+        serializer = OrderToProductSerializer(order_to_project)
+        return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        order_to_project = self.get_object(pk)
+        serializer = OrderToProductSerializer(order_to_project, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, pk, format=None):
+        order_to_project = self.get_object(pk)
+        order_to_project.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 # Route Discount
 class DiscountList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
@@ -178,3 +193,6 @@ class DiscountDetail(mixins.RetrieveModelMixin,
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+

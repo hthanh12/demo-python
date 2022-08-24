@@ -1,7 +1,4 @@
 from django.db import models
-from pygments.lexers import get_all_lexers
-from pygments.styles import get_all_styles
-from rest_framework import serializers
 
 # Create your models here.
 
@@ -89,7 +86,7 @@ class OrderToProduct(models.Model):
     price = models.FloatField()
     quantity = models.IntegerField()
     amount = models.FloatField()
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='products')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
 
     class Meta:
