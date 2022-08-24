@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Member, Product, Order, OrderToProduct, Discount
+from api.models import *
 
 data_update = lambda instance, validated_data, list: [setattr(instance, x, validated_data.get(x, getattr(instance, x))) for x in list]
 
@@ -117,14 +117,6 @@ class OrderToProductSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def delete(self, instance):
-        print('deletedeletedeletedelete')
-        return instance
-
-    def perform_destroy(self, instance):
-        print('destroydestroydestroydestroydestroydestroydestroy')
-        return instance
-        
 class OrderToProductListingField(serializers.RelatedField):
     def to_representation(self, value):
         return {

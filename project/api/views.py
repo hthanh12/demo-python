@@ -1,8 +1,8 @@
 # Create your views here.
 from django.http import Http404
 from distutils.log import error
-from api.models import Member, Product, Order, OrderToProduct, Discount
-from api.serializers import MemberSerializer, ProductSerializer, OrderSerializer, OrderToProductSerializer, DiscountSerializer
+from api.models import *
+from api.serializers import *
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.parsers import JSONParser
