@@ -25,3 +25,4 @@ class DiscountSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+        
