@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from api.models import *
- 
+  
 data_update = lambda instance, validated_data, list: [setattr(instance, x, validated_data.get(x, getattr(instance, x))) for x in list]
 
 def cal_sum_order_current(order_id):
